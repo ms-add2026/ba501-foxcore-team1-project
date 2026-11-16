@@ -1,160 +1,166 @@
-CREATE DATABASE  IF NOT EXISTS `ap` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `ap`;
--- MySQL dump 10.13  Distrib 8.0.46, for macos15 (arm64)
---
--- Host: localhost    Database: ap
--- ------------------------------------------------------
--- Server version	8.0.46
+-- MySQL Workbench Forward Engineering
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
---
--- Table structure for table `customers`
---
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+-- Schema foxcore_retail
+-- -----------------------------------------------------
 
-DROP TABLE IF EXISTS `customers`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `customers` (
-  `id` varchar(20) DEFAULT NULL,
-  `full_name` text,
-  `created_at` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- -----------------------------------------------------
+-- Schema foxcore_retail
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `foxcore_retail` ;
+USE `foxcore_retail` ;
 
---
--- Table structure for table `orders`
---
+-- -----------------------------------------------------
+-- Table `foxcore_retail`.`venue`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `foxcore_retail`.`venue` ;
 
-DROP TABLE IF EXISTS `orders`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `orders` (
-  `id` varchar(20) DEFAULT NULL,
-  `created_at` date DEFAULT NULL,
-  `closed_at` date DEFAULT NULL,
-  `cancelled_at` date DEFAULT NULL,
-  `customer_id` varchar(20) DEFAULT NULL,
-  `financial_status` text,
-  `fulfillment_status` text,
-  `processed_at` date DEFAULT NULL,
-  `total_price` double DEFAULT NULL,
-  `shipping_rate` text,
-  `subtotal_price` double DEFAULT NULL,
-  `total_discounts` double DEFAULT NULL,
-  `total_line_items_price` double DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE IF NOT EXISTS `foxcore_retail`.`venue` (
+  `venue_id` INT NOT NULL AUTO_INCREMENT,
+  `venue_name` VARCHAR(100) NOT NULL,
+  `address` VARCHAR(255) NOT NULL,
+  `parking_instructions` VARCHAR(255) NULL,
+  `description` VARCHAR(255) NULL,
+  PRIMARY KEY (`venue_id`))
+ENGINE = InnoDB;
 
---
--- Table structure for table `orders_items`
---
 
-DROP TABLE IF EXISTS `orders_items`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `orders_items` (
-  `id` varchar(20) DEFAULT NULL,
-  `order_id` varchar(20) DEFAULT NULL,
-  `product_id` varchar(20) DEFAULT NULL,
-  `product_style` text,
-  `variant_id` varchar(20) DEFAULT NULL,
-  `sku` text,
-  `product_title` text,
-  `fulfillment_status` text,
-  `price` double DEFAULT NULL,
-  `quantity` bigint DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- -----------------------------------------------------
+-- Table `foxcore_retail`.`retail_event`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `foxcore_retail`.`retail_event` ;
 
---
--- Table structure for table `products`
---
+CREATE TABLE IF NOT EXISTS `foxcore_retail`.`retail_event` (
+  `event_id` INT NOT NULL AUTO_INCREMENT,
+  `venue_id` INT NOT NULL,
+  `event_type` VARCHAR(50) NOT NULL,
+  `event_name` VARCHAR(100) NOT NULL,
+  `start_date` DATE NOT NULL,
+  `end_date` DATE NOT NULL,
+  `description` VARCHAR(255) NULL,
+  PRIMARY KEY (`event_id`),
+  INDEX `venue_id_idx` (`venue_id` ASC) VISIBLE,
+  CONSTRAINT `venue_id`
+    FOREIGN KEY (`venue_id`)
+    REFERENCES `foxcore_retail`.`venue` (`venue_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
 
-DROP TABLE IF EXISTS `products`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `products` (
-  `id` varchar(20) DEFAULT NULL,
-  `title` text,
-  `product_type` text,
-  `created_at` date DEFAULT NULL,
-  `published_at` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `products_skus`
---
+-- -----------------------------------------------------
+-- Table `foxcore_retail`.`booth`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `foxcore_retail`.`booth` ;
 
-DROP TABLE IF EXISTS `products_skus`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `products_skus` (
-  `id` varchar(20) DEFAULT NULL,
-  `product_id` varchar(20) DEFAULT NULL,
-  `product_style` text,
-  `sku` text,
-  `created_at` date DEFAULT NULL,
-  `price` double DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE IF NOT EXISTS `foxcore_retail`.`booth` (
+  `booth_id` INT NOT NULL AUTO_INCREMENT,
+  `event_id` INT NOT NULL,
+  `location_code` VARCHAR(30) NOT NULL,
+  `description` VARCHAR(255) NULL,
+  PRIMARY KEY (`booth_id`),
+  INDEX `event_id_idx` (`event_id` ASC) VISIBLE,
+  CONSTRAINT `event_id`
+    FOREIGN KEY (`event_id`)
+    REFERENCES `foxcore_retail`.`retail_event` (`event_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
 
---
--- Table structure for table `traffic`
---
 
-DROP TABLE IF EXISTS `traffic`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `traffic` (
-  `index` bigint DEFAULT NULL,
-  `date_day` date DEFAULT NULL,
-  `page_views` bigint DEFAULT NULL,
-  `sessions` bigint DEFAULT NULL,
-  `product_detail_views` bigint DEFAULT NULL,
-  `product_checkouts` bigint DEFAULT NULL,
-  `product_adds_to_carts` bigint DEFAULT NULL,
-  `avg_session_in_s` double DEFAULT NULL,
-  KEY `ix_traffic_index` (`index`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- -----------------------------------------------------
+-- Table `foxcore_retail`.`salesperson`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `foxcore_retail`.`salesperson` ;
 
---
--- Table structure for table `transactions`
---
+CREATE TABLE IF NOT EXISTS `foxcore_retail`.`salesperson` (
+  `salesperson_id` INT NOT NULL AUTO_INCREMENT,
+  `first_name` VARCHAR(50) NOT NULL,
+  `last_name` VARCHAR(50) NOT NULL,
+  `address` VARCHAR(255) NULL,
+  `phone_number` VARCHAR(25) NULL,
+  PRIMARY KEY (`salesperson_id`))
+ENGINE = InnoDB;
 
-DROP TABLE IF EXISTS `transactions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `transactions` (
-  `order_id` varchar(20) DEFAULT NULL,
-  `id` varchar(20) DEFAULT NULL,
-  `parent_id` varchar(20) DEFAULT NULL,
-  `amount` double DEFAULT NULL,
-  `error_code` text,
-  `kind` text,
-  `status` text,
-  `created_at` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+-- -----------------------------------------------------
+-- Table `foxcore_retail`.`work_shift`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `foxcore_retail`.`work_shift` ;
 
--- Dump completed on 2026-11-15 17:13:53
+CREATE TABLE IF NOT EXISTS `foxcore_retail`.`work_shift` (
+  `shift_id` INT NOT NULL AUTO_INCREMENT,
+  `booth_id` INT NOT NULL,
+  `salesperson_id` INT NOT NULL,
+  `start_datetime` DATETIME NOT NULL,
+  `end_datetime` DATETIME NOT NULL,
+  PRIMARY KEY (`shift_id`),
+  INDEX `booth_id_idx` (`booth_id` ASC) VISIBLE,
+  INDEX `salesperson_id_idx` (`salesperson_id` ASC) VISIBLE,
+  CONSTRAINT `booth_id`
+    FOREIGN KEY (`booth_id`)
+    REFERENCES `foxcore_retail`.`booth` (`booth_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `salesperson_id`
+    FOREIGN KEY (`salesperson_id`)
+    REFERENCES `foxcore_retail`.`salesperson` (`salesperson_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `foxcore_retail`.`product`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `foxcore_retail`.`product` ;
+
+CREATE TABLE IF NOT EXISTS `foxcore_retail`.`product` (
+  `product_id` INT NOT NULL AUTO_INCREMENT,
+  `product_name` VARCHAR(100) NOT NULL,
+  `description` VARCHAR(255) NULL,
+  `wholesale_cost` DECIMAL(10,2) NOT NULL,
+  `minimum_selling_price` DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (`product_id`),
+  UNIQUE INDEX `product_name_UNIQUE` (`product_name` ASC) VISIBLE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `foxcore_retail`.`sale`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `foxcore_retail`.`sale` ;
+
+CREATE TABLE IF NOT EXISTS `foxcore_retail`.`sale` (
+  `sale_id` INT NOT NULL AUTO_INCREMENT,
+  `shift_id` INT NOT NULL,
+  `product_id` INT NOT NULL,
+  `sale_datetime` DATETIME NOT NULL,
+  `quantity` INT NOT NULL,
+  `final_unit_price` DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (`sale_id`),
+  INDEX `shift_id_idx` (`shift_id` ASC) VISIBLE,
+  INDEX `product_id_idx` (`product_id` ASC) VISIBLE,
+  CONSTRAINT `shift_id`
+    FOREIGN KEY (`shift_id`)
+    REFERENCES `foxcore_retail`.`work_shift` (`shift_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `product_id`
+    FOREIGN KEY (`product_id`)
+    REFERENCES `foxcore_retail`.`product` (`product_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
