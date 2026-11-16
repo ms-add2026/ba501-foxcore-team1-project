@@ -1,13 +1,4 @@
--- FOXCORE EE#4 — MySQL Workbench setup + sample data (safe to rerun)
--- Includes CREATE DATABASE, USE, CREATE TABLE and INSERT/UPDATE seed data.
--- Model: same seven entities and columns used in the team's EE#2 EER diagram.
--- Run the entire script in an SQL editor connected to MySQL server.
--- On rerun, existing seeded primary keys are updated; new records are inserted.
--- Other unrelated records are preserved; the schema is NOT dropped.
--- WARNING: edits to seeded IDs (venue 1..4, etc.) will be overwritten on rerun.
--- Source: Legacy Excel workbook and paper sales sheets. Some imported values
--- were inferred/standardized and require confirmation against the originals.
--- No commission columns/tables are created.
+-- FOXCORE EE#4 —setup with sample data
 
 CREATE DATABASE IF NOT EXISTS foxcore_ee4;
 USE foxcore_ee4;
@@ -49,7 +40,7 @@ CREATE TABLE IF NOT EXISTS sale (
 ) ENGINE=InnoDB;
 
 
--- venue: 4 rows
+-- venue table
 INSERT INTO venue (venue_id, venue_name, address, parking_instructions, description) VALUES
  (1, 'Main Street Downtown Core', 'Main St between King and Queen, Kitchener, ON', 'Street closed at 6 AM
 ON DUPLICATE KEY UPDATE
@@ -61,7 +52,7 @@ ON DUPLICATE KEY UPDATE
  (3, 'Centennial Square', '1 Centennial Sq, Windsor, ON', 'Underground garage, level P2', NULL),
  (4, 'Maple Grove Exhibition Grounds', '300 Exhibition Dr, Barrie, ON', 'Enter via Gate 1; no overnight parking', NULL);
 
--- retail_event: 5 rows
+-- retail_event table
 INSERT INTO retail_event (event_id, event_name, start_date, end_date, event_type, venue_id, description) VALUES
  (1, 'Steel City Charity Games', '2016-06-10', '2016-06-12', 'Sporting Event', 1, 'Charity sports tournament weekend'),
  (2, 'Brewers Row Summer Fest', '2016-06-24', '2016-06-26', 'Beer Festival', 2, 'Local breweries and live acts'),
@@ -76,7 +67,7 @@ ON DUPLICATE KEY UPDATE
   venue_id = VALUES(venue_id),
   description = VALUES(description);
 
--- booth: 6 rows
+-- booth table
 INSERT INTO booth (booth_id, event_id, location_code, description) VALUES
  (1, 1, 'P17', NULL),
  (2, 2, 'T17', NULL),
@@ -89,7 +80,7 @@ ON DUPLICATE KEY UPDATE
   location_code = VALUES(location_code),
   description = VALUES(description);
 
--- product: 8 rows
+-- product table
 INSERT INTO product (product_id, product_name, wholesale_cost, minimum_selling_price, description) VALUES
  (1, 'Bubble Gun', 5, 11, NULL),
  (2, 'Arctic Skin Cooling Towel', 2.75, 8, NULL),
@@ -105,7 +96,7 @@ ON DUPLICATE KEY UPDATE
   minimum_selling_price = VALUES(minimum_selling_price),
   description = VALUES(description);
 
--- salesperson: 6 rows
+-- salesperson table
 INSERT INTO salesperson (salesperson_id, first_name, last_name, address, phone_number) VALUES
  (1, 'Jordan', 'Patel', '246 Talbot St, London, ON', '519-555-0174'),
  (2, 'Ravi', 'Campbell', '293 Huron St, London, ON', '(519) 555-0198'),
@@ -119,7 +110,7 @@ ON DUPLICATE KEY UPDATE
   address = VALUES(address),
   phone_number = VALUES(phone_number);
 
--- work_shift: 19 rows
+-- work_shift table
 INSERT INTO work_shift (shift_id, booth_id, salesperson_id, start_datetime, end_datetime) VALUES
  (1, 1, 6, '2016-06-10 14:00:00', '2016-06-10 20:00:00'),
  (2, 1, 3, '2016-06-11 10:00:00', '2016-06-11 18:00:00'),
@@ -146,7 +137,7 @@ ON DUPLICATE KEY UPDATE
   start_datetime = VALUES(start_datetime),
   end_datetime = VALUES(end_datetime);
 
--- sale: 74 rows
+-- sale table
 INSERT INTO sale (sale_id, shift_id, product_id, sale_datetime, quantity, final_unit_price) VALUES
  (1, 1, 8, '2016-06-10 12:00:00', 2, 14.00),
  (2, 1, 6, '2016-06-10 12:00:00', 1, 6.00),
@@ -229,3 +220,22 @@ ON DUPLICATE KEY UPDATE
   quantity = VALUES(quantity),
   final_unit_price = VALUES(final_unit_price);
 
+
+SELECT
+    sp.salesperson_id,
+    CONCAT(sp.first_name, ' ', sp.last_name) AS salesperson,
+    COUNT(s.sale_id) AS total_transactions,
+    SUM(s.quantity) AS total_units_sold,
+    ROUND(SUM(s.quantity * s.final_unit_price), 2) AS total_sales,
+    ROUND(SUM(s.quantity * s.final_unit_price) * 0.10, 2)
+        AS commission
+FROM salesperson sp
+JOIN work_shift ws
+    ON sp.salesperson_id = ws.salesperson_id
+JOIN sale s
+    ON ws.shift_id = s.shift_id
+GROUP BY
+    sp.salesperson_id,
+    sp.first_name,
+    sp.last_name
+ORDER BY total_sales DESC;
